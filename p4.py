@@ -27,33 +27,32 @@ def calcular_ganancias(n, actividades, rutas, consultas):
     resultados = []
     for consulta in consultas:
         ganancia = distancia[consulta]
-        # Ajuste aquí: Se imprime '?' si la ganancia es infinita o menor que 3.
-        if ganancia == float('inf') or ganancia < 3:
+        if ganancia == float('inf'):
             resultados.append('?')
         else:
-            resultados.append(ganancia)
+            resultados.append(int(ganancia))
     
     return resultados
-
 def main():
     caso = 1
-    try:
-        while True:
+    entrada = input().split()
+    while entrada:
+        n = int(entrada[0])
+        actividades = [0] + list(map(int, entrada[1:]))
+        r = int(input())
+        rutas = [tuple(map(int, input().split())) for _ in range(r)]
+        q = int(input())
+        consultas = [int(input()) for _ in range(q)]
+        
+        resultados = calcular_ganancias(n, actividades, rutas, consultas)
+        print(f"Set #{caso}")
+        for resultado in resultados:
+            print(resultado)
+        caso += 1
+        try:
             entrada = input().split()
-            n = int(entrada[0])
-            actividades = [0] + list(map(int, entrada[1:]))
-            r = int(input())
-            rutas = [tuple(map(int, input().split())) for _ in range(r)]
-            q = int(input())
-            consultas = [int(input()) for _ in range(q)]
-            
-            resultados = calcular_ganancias(n, actividades, rutas, consultas)
-            print(f"Set #{caso}")
-            for resultado in resultados:
-                print('?' if resultado == '?' else int(resultado))
-            caso += 1
-    except EOFError:
-        pass
+        except EOFError:
+            break
 
 if __name__ == "__main__":
     main()

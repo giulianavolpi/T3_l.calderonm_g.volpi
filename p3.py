@@ -16,26 +16,41 @@ def dijkstra(grafo, start):
     return distancia
 
 def min_aeropuertos(N, M, K, ciudades_con_aeropuerto, rutas, demandas):
-    aeropuertos_necesarios = 0
+    # Inicializar el grafo
     grafo = {i: [] for i in range(1, N + 1)}
     for a, b in rutas:
         grafo[a].append((b, 1))
         grafo[b].append((a, 1))
 
-    resp = []
-    for x, y in demandas:
-        if x in ciudades_con_aeropuerto and y in ciudades_con_aeropuerto:
-            resp.append(0)
-        else:
-            distancia = dijkstra(grafo, x)
-            if distancia[y] == float('inf'):
-                resp.append(-1)
-            else:
-                for ciudad in range(1, N + 1):
-                    if ciudad not in ciudades_con_aeropuerto and distancia[ciudad] != float('inf'):
-                        aeropuertos_necesarios += 1
-                resp.append(aeropuertos_necesarios)  
-    return resp
+    respuestas = []
+    for demanda in demandas:
+        x, y = demanda
+        if x == y:
+            # Si el origen y destino son iguales, no se necesitan aeropuertos adicionales.
+            respuestas.append(0)
+            continue
+
+        distancia = dijkstra(grafo, x)
+        if distancia[y] == float('inf'):
+            # Si no hay ruta posible, la demanda no puede ser satisfecha.
+            respuestas.append(-1)
+            continue
+
+        # Calcular aeropuertos necesarios considerando ciudades sin aeropuerto en la ruta mínima
+        ciudades_en_ruta = set()
+        ciudad_actual = y
+        while ciudad_actual != x:
+            for vecino, _ in grafo[ciudad_actual]:
+                if distancia[ciudad_actual] == distancia[vecino] + 1:
+                    ciudades_en_ruta.add(ciudad_actual)
+                    ciudad_actual = vecino
+                    break
+
+        # Contar solo las ciudades que necesitan un aeropuerto nuevo.
+        aeropuertos_necesarios = sum(1 for ciudad in ciudades_en_ruta if ciudad not in ciudades_con_aeropuerto)
+        respuestas.append(aeropuertos_necesarios)
+
+    return respuestas
 
 def main():
     X = int(input())
@@ -55,6 +70,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-

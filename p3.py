@@ -1,26 +1,29 @@
 import heapq
 
-def dijkstra(grafo, start):
-    distancia = {ciudad: float('inf') for ciudad in grafo}
-    distancia[start] = 0
-    cola = [(0, start)]
-    while cola:
-        distancia_actual, actual = heapq.heappop(cola)
-        if distancia_actual > distancia[actual]:
+def dijkstra(grafo, x):
+    distancia = [float('inf')] * (len(grafo) + 1)
+    distancia[x] = 0
+    cola_prioridad = [(0, x)]
+
+    while cola_prioridad:
+        distancia_actual, ciudad_actual = heapq.heappop(cola_prioridad)
+
+        if distancia_actual > distancia[ciudad_actual]:
             continue
-        for vecino, peso in grafo[actual]:
-            nueva_distancia = distancia_actual + peso
+
+        for vecino in grafo[ciudad_actual]:
+            nueva_distancia = distancia_actual + 1
             if nueva_distancia < distancia[vecino]:
                 distancia[vecino] = nueva_distancia
-                heapq.heappush(cola, (nueva_distancia, vecino))
-    return distancia
+                heapq.heappush(cola_prioridad, (nueva_distancia, vecino))
 
+    return distancia
 def min_aeropuertos(N, M, K, ciudades_con_aeropuerto, rutas, demandas):
     # Inicializar el grafo
     grafo = {i: [] for i in range(1, N + 1)}
     for a, b in rutas:
-        grafo[a].append((b, 1))
-        grafo[b].append((a, 1))
+        grafo[a].append(b)
+        grafo[b].append(a)
 
     respuestas = []
     for demanda in demandas:
@@ -36,18 +39,20 @@ def min_aeropuertos(N, M, K, ciudades_con_aeropuerto, rutas, demandas):
             respuestas.append(-1)
             continue
 
-        # Calcular aeropuertos necesarios considerando ciudades sin aeropuerto en la ruta mínima
-        ciudades_en_ruta = set()
+        # Reconstruir la ruta mínima
+        ruta_minima = []
         ciudad_actual = y
         while ciudad_actual != x:
-            for vecino, _ in grafo[ciudad_actual]:
+            ruta_minima.append(ciudad_actual)
+            for vecino in grafo[ciudad_actual]:
                 if distancia[ciudad_actual] == distancia[vecino] + 1:
-                    ciudades_en_ruta.add(ciudad_actual)
                     ciudad_actual = vecino
                     break
+        ruta_minima.append(x)  # Agregar la ciudad de origen al final de la ruta mínima
+        ruta_minima.reverse()  # Invertir la ruta para que empiece desde el origen
 
         # Contar solo las ciudades que necesitan un aeropuerto nuevo.
-        aeropuertos_necesarios = sum(1 for ciudad in ciudades_en_ruta if ciudad not in ciudades_con_aeropuerto)
+        aeropuertos_necesarios = sum(1 for ciudad in ruta_minima if ciudad not in ciudades_con_aeropuerto)
         respuestas.append(aeropuertos_necesarios)
 
     return respuestas

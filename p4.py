@@ -10,8 +10,10 @@ def dijkstra(actividades, grafo, start):
             continue
         
         for vecino in grafo[actual]:
-            peso = abs(actividades[vecino] - actividades[actual]) ** 3
-            nueva_distancia = distancia_actual + peso
+            peso = (actividades[vecino] - actividades[actual]) ** 3
+            if peso < 0:
+                continue  # Evitar agregar rutas con ganancia negativa
+            nueva_distancia = distancia[actual] + peso
             if nueva_distancia < distancia[vecino]:
                 distancia[vecino] = nueva_distancia
                 heapq.heappush(cola, (nueva_distancia, vecino))
@@ -22,35 +24,38 @@ def calcular_ganancias(n, actividades, rutas, consultas):
     grafo = {i: [] for i in range(1, n + 1)}
     for a, b in rutas:
         grafo[a].append(b)
-    
     distancia = dijkstra(actividades, grafo, 1)
     resultados = []
     for consulta in consultas:
         ganancia = distancia[consulta]
-        if ganancia == float('inf'):
+        if ganancia == float('inf') or ganancia < 3:
             resultados.append('?')
         else:
             resultados.append(int(ganancia))
     
     return resultados
+
 def main():
     caso = 1
-    entrada = input().split()
-    while entrada:
-        n = int(entrada[0])
-        actividades = [0] + list(map(int, entrada[1:]))
-        r = int(input())
-        rutas = [tuple(map(int, input().split())) for _ in range(r)]
-        q = int(input())
-        consultas = [int(input()) for _ in range(q)]
-        
-        resultados = calcular_ganancias(n, actividades, rutas, consultas)
-        print(f"Set #{caso}")
-        for resultado in resultados:
-            print(resultado)
-        caso += 1
+    while True:
         try:
             entrada = input().split()
+            if not entrada:
+                break
+            n = int(entrada[0])
+            if n == 0:
+                break
+            actividades = [0] + list(map(int, entrada[1:n+1]))
+            r = int(input())
+            rutas = [tuple(map(int, input().split())) for _ in range(r)]
+            q = int(input())
+            consultas = [int(input()) for _ in range(q)]
+            
+            resultados = calcular_ganancias(n, actividades, rutas, consultas)
+            print(f"Set #{caso}")
+            for resultado in resultados:
+                print(resultado)
+            caso += 1
         except EOFError:
             break
 

@@ -3,17 +3,15 @@ def bellman_ford(actividades, grafo, start):
     distancia = [float('inf')] * (n + 1)
     distancia[start] = 0
     
-    # Relajar las aristas n - 1 veces
     for _ in range(n):
         for actual in range(1, n + 1):
             for vecino in grafo[actual]:
                 peso = (actividades[vecino] - actividades[actual]) ** 3
                 if peso < 0:
-                    continue  # Ignoramos pesos negativos, como se hacía antes
+                    continue 
                 if distancia[actual] + peso < distancia[vecino]:
                     distancia[vecino] = distancia[actual] + peso
     
-    # Comprobar ciclos de peso negativo (no necesario para este problema, pero es parte del algoritmo)
     for actual in range(1, n + 1):
         for vecino in grafo[actual]:
             peso = (actividades[vecino] - actividades[actual]) ** 3

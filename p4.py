@@ -1,22 +1,27 @@
-def dijkstra(actividades, grafo, start):
+def bellman_ford(actividades, grafo, start):
     n = len(actividades) - 1
     distancia = [float('inf')] * (n + 1)
     distancia[start] = 0
-    cola = [(0, start)]
-    import heapq
-    while cola:
-        distancia_actual, actual = heapq.heappop(cola)
-        if distancia_actual > distancia[actual]:
-            continue
-        
+    
+    # Relajar las aristas n - 1 veces
+    for _ in range(n):
+        for actual in range(1, n + 1):
+            for vecino in grafo[actual]:
+                peso = (actividades[vecino] - actividades[actual]) ** 3
+                if peso < 0:
+                    continue  # Ignoramos pesos negativos, como se hacía antes
+                if distancia[actual] + peso < distancia[vecino]:
+                    distancia[vecino] = distancia[actual] + peso
+    
+    # Comprobar ciclos de peso negativo (no necesario para este problema, pero es parte del algoritmo)
+    for actual in range(1, n + 1):
         for vecino in grafo[actual]:
             peso = (actividades[vecino] - actividades[actual]) ** 3
             if peso < 0:
-                continue  # Evitar agregar rutas con ganancia negativa
-            nueva_distancia = distancia[actual] + peso
-            if nueva_distancia < distancia[vecino]:
-                distancia[vecino] = nueva_distancia
-                heapq.heappush(cola, (nueva_distancia, vecino))
+                continue
+            if distancia[actual] + peso < distancia[vecino]:
+                print("Ciclo de peso negativo encontrado")
+                return None
     
     return distancia
 
@@ -24,7 +29,7 @@ def calcular_ganancias(n, actividades, rutas, consultas):
     grafo = {i: [] for i in range(1, n + 1)}
     for a, b in rutas:
         grafo[a].append(b)
-    distancia = dijkstra(actividades, grafo, 1)
+    distancia = bellman_ford(actividades, grafo, 1)
     resultados = []
     for consulta in consultas:
         ganancia = distancia[consulta]
